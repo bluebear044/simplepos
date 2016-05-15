@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>Simple POS Upload</title>
+        <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='stylesheets/style.css') }}">
+        <script src="{{ url_for('static', filename='javascripts/jquery-1.11.1.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='javascripts/common.js') }}" type="text/javascript"></script>
+    </head>
+
+    <script type="text/javascript">
+    </script>
+
+<body>
+
+<form name="myform" action="/upload/action" method="post" enctype="multipart/form-data">
+
+    <table border='1'>
+        <tr>
+            <td>
+                <input name="excelFile" type="file" />
+                <input type="submit" value="업로드" />
+            </td>
+        </tr>
+    </table>
+    <div style="margin-top:10px;">
+        <input type="button" value="돌아가기" onclick="javascript:history.back()"/>
+    </div>
+
+</form>
+
+</body>
+</html>

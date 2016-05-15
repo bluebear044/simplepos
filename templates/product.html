@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>Simple POS Product</title>
+        <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='stylesheets/style.css') }}">
+        <script src="{{ url_for('static', filename='javascripts/jquery-1.11.1.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='javascripts/common.js') }}" type="text/javascript"></script>
+    </head>
+
+    <script type="text/javascript">
+
+    function insertProduct() {
+
+        var productName = $("input[name$='productName']").val();
+        var productPrice = $("input[name$='productPrice']").val();
+        var stock = $("input[name$='stock']").val();
+
+        if(productName == "" || productPrice == "" || stock == "") {
+            alert("상품이름, 상품가격, 재고를 입력해주세요.");
+            return false;
+        }
+
+        document.myform.action = "/product/insert";
+        ajax.post($("#myform"),"저장 완료",false);
+        location.reload(true);
+        //document.myform.submit();
+    }    
+
+    function deleteProduct(productCode) {
+
+        //여러건 삭제
+        if($("input[name=productCheckBox]:checked").length > 0) {
+             if (!confirm("여러 상품을 체크하셨습니다. 모두 삭제 하시겠습니까?")) return;
+
+            $("input[name=productCheckBox]:checked").each(function (index) {
+                document.myform.productCode.value = $(this).val();
+                document.myform.action = "/product/delete";
+                ajax.post($("#myform"),undefined,false);
+            });
+            drawToast("삭제 완료");
+            location.reload(true);
+
+        }else {
+            if (!confirm("삭제 하시겠습니까?")) return;
+            document.myform.productCode.value = productCode;
+            document.myform.action = "/product/delete";
+            ajax.post($("#myform"),"삭제 완료",false);
+            location.reload(true);
+            //document.myform.submit();
+        }
+
+    }
+
+    function updateProduct(productCode) {
+
+        document.myform.updateName.value = $('#product_name_'+productCode).val();
+        document.myform.updateDesc.value = $('#product_desc_'+productCode).val();
+        document.myform.updatePrice.value = $('#product_price_'+productCode).val();
+        document.myform.updateStock.value = $('#product_stock_'+productCode).val();
+
+        console.log(document.myform.updateName.value);
+        console.log(document.myform.updateDesc.value);
+        console.log(document.myform.updatePrice.value);
+        console.log(document.myform.updateStock.value);
+
+        document.myform.productCode.value = productCode;
+        document.myform.action = "/product/update";
+
+        ajax.post($("#myform"),"수정 완료");
+        //document.myform.submit();
+    }
+
+    function printHistory() {
+
+        window.print();
+
+    }
+
+    function submitEvent(e)
+    {
+       if(e && e.keyCode == 13)
+       {
+          insertProduct();
+       }
+    }
+
+    function excelDown() {
+
+        if (!confirm("엑셀 다운을 하시겠습니까?")) return;
+
+        location.href='/excel/product';
+
+    }
+
+    function allCheck() {
+        var checkBoxes = $("input[name=productCheckBox]");
+        if($("#allcheck").prop("checked") == true) {
+            checkBoxes.prop("checked", true);
+        }else {
+            checkBoxes.prop("checked", false);
+        }        
+    }
+
+    </script>
+
+<body>
+
+<form id="myform" name="myform" action="" method="post" onKeyPress="return submitEvent(event)">
+<input type="hidden" name="productCode" />
+<input type="hidden" name="updateName" />
+<input type="hidden" name="updateDesc" />
+<input type="hidden" name="updatePrice" />
+<input type="hidden" name="updateStock" />
+
+    <h1>[ 상품 관리 ]</h1>
+
+    <div id="container">
+        <table border="1" width="100%">
+            <thead>
+                <colgroup>
+                    <col width="10">
+                    <col width="*">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="130">
+                </colgroup>
+                <tr>
+                    <th scope="col" bgcolor="#F9F8F6"><input type="checkbox" id="allcheck" onchange="javascript:allCheck();" /></th>               
+                    <th scope="col" bgcolor="#F9F8F6">상품이름</th>               
+                    <th scope="col" bgcolor="#F9F8F6">상품설명</th>
+                    <th scope="col" bgcolor="#F9F8F6">상품가격</th>
+                    <th scope="col" bgcolor="#F9F8F6">재고</th>
+                    <th scope="col" bgcolor="#F9F8F6"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in productResult %}
+                <tr>
+                    <td><input type="checkbox" name="productCheckBox" value="{{item['product_code']}}" /></td>
+                    <td><input type="text" id="product_name_{{item['product_code']}}" value="{{item['product_name']}}" onchange="javascript:updateProduct({{item['product_code']}});" /></td>
+                    <td>                    
+                        <select id="product_desc_{{item['product_code']}}" name="category" onchange="javascript:updateProduct({{item['product_code']}});">
+                            <option value="미지정">미지정</option >
+                          {% for category in categoryResult %}
+                              <option value="{{category['category_name']}}" {% if item['product_desc'] == category['category_name'] %} selected {% endif %}>{{category['category_name']}}</option >
+                          {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" id="product_price_{{item['product_code']}}" value="{{item['product_price']}}" onkeypress="checkForNumber()" onchange="javascript:updateProduct({{item['product_code']}});" /></td>
+                    <td><input type="text" id="product_stock_{{item['product_code']}}" value="{{item['stock']}}" onkeypress="checkForNumber()" onchange="javascript:updateProduct({{item['product_code']}});" /></td>
+                    <td>
+                        <input type="button" onclick="javascript:deleteProduct({{item['product_code']}});" value="삭제" />
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td><input type="text" name="productName" /></td>
+                    <td>                    
+                        <select name="productDesc">
+                          {% for category in categoryResult %}
+                              <option value="{{category['category_name']}}" >{{category['category_name']}}</option >
+                          {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" name="productPrice" onkeypress="checkForNumber()" /></td>
+                    <td><input type="text" name="stock" onkeypress="checkForNumber()" /></td>
+                    <td>
+                        <input type="button" onclick="javascript:insertProduct();" value="저장" class="chooseBox"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <input type="button" onclick="location.href='/'" value="메인" />
+        <input type="button" onclick="location.href='/product'" value="상품관리" />
+        <input type="button" onclick="location.href='/sale'" value="판매이력" />
+        <input type="button" onclick="javascript:excelDown();" value="엑셀 다운" />
+        <input type="button" onclick="location.href='/upload'" value="엑셀 업로드" />
+        <input type="button" onclick="location.href='/category'" value="카테고리" />
+    </div>
+    
+</form>
+
+</body>
+</html>

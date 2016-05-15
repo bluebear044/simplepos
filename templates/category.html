@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>Simple POS Category</title>
+        <link rel="stylesheet" media="screen" href="{{ url_for('static', filename='stylesheets/style.css') }}">
+        <script src="{{ url_for('static', filename='javascripts/jquery-1.11.1.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='javascripts/common.js') }}" type="text/javascript"></script>
+    </head>
+
+    <script type="text/javascript">
+
+        function insertCategory() {
+            var categoryName = $("input[name$='categoryName']").val();
+            if(categoryName == "") {
+                alert("카테고리 명을 입력해주세요.");
+                return false;
+            }
+            document.myform.action = "/category/insert";
+            document.myform.submit();
+        }  
+
+        function deleteCategory(categoryCode) {
+            if (!confirm("삭제 하시겠습니까?")) return;
+            document.myform.categoryCode.value = categoryCode;
+            document.myform.action = "/category/delete";
+            document.myform.submit();
+        }
+
+        function updateCategory(categoryCode) {
+            document.myform.categoryCode.value = categoryCode;
+            document.myform.updateCategoryName.value = $('#category_name_'+categoryCode).val();
+            document.myform.updateCategorySort.value = $('#category_sort_'+categoryCode).val();
+            document.myform.action = "/category/update";
+            ajax.post($("#myform"),"수정 완료");
+        }
+
+        function submitEvent(e) {
+           if(e && e.keyCode == 13)
+           {
+              insertCategory();
+           }
+        }
+
+        function goMain() {
+            location.href = "/product";
+        }
+
+    </script>
+
+<body>
+
+<form id="myform" name="myform" action="" method="post" onKeyPress="return submitEvent(event)">
+<input type="hidden" name="categoryCode" />
+<input type="hidden" name="updateCategoryName" />
+<input type="hidden" name="updateCategorySort" />
+
+    <div id="container">
+        <table border="1" width="500px">
+            <thead>
+                <colgroup>
+                    <col width="*">
+                    <col width="*">
+                    <col width="100px">
+                </colgroup>
+                <tr>            
+                    <th scope="col" bgcolor="#F9F8F6">카테고리 명</th>
+                    <th scope="col" bgcolor="#F9F8F6">카테고리 순서</th>
+                    <th scope="col" bgcolor="#F9F8F6"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in categoryResult %}
+                <tr onchange="javascript:updateCategory({{item['category_code']}});" >
+                    <td><input type="text" id="category_name_{{item['category_code']}}" value="{{item['category_name']}}" /></td>
+                    <td><input type="text" id="category_sort_{{item['category_code']}}" value="{{item['category_sort']}}" onkeypress="checkForNumber()" /></td>
+                    <td>
+                        <input type="button" onclick="javascript:deleteCategory({{item['category_code']}});" value="삭제" />
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td><input type="text" name="categoryName" /></td>
+                    <td><input type="text" name="categorySort" onkeypress="checkForNumber()" /></td>
+                    <td><input type="button" onclick="javascript:insertCategory();" value="저장" class="chooseBox"/></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:10px;">
+        <input type="button" value="돌아가기" onclick="javascript:goMain()"/>
+    </div>
+
+</form>
+
+</body>
+</html>

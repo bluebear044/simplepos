@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Simple Pos</title>
+	<script src="{{ url_for('static', filename='javascripts/jquery-2.2.3.js') }}" type="text/javascript"></script>
+	<script src="{{ url_for('static', filename='javascripts/common.js') }}" type="text/javascript"></script>
+	<script src="{{ url_for('static', filename='javascripts/simplepos.js') }}" type="text/javascript"></script>
+	<script src="{{ url_for('static', filename='javascripts/jquery-ui.min.js') }}" type="text/javascript"></script>
+	<link rel="stylesheet" media="screen" href="{{ url_for('static', filename='stylesheets/style.css') }}">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" media="screen" href="{{ url_for('static', filename='stylesheets/jquery-ui.css') }}">
+</head>
+<body>
+
+	<!-- Delete Form s-->
+	<form name="deleteForm" method="post" action="product/delete">
+		<input type="hidden" name="productCode" id="productCode" value="" />
+	</form>
+	<!-- Delete Form e-->
+
+	<!-- EndOfSale Form s-->
+	<form name="endOfSaleForm" method="post" action="approve">
+		<input type="hidden" name="dummy" value="" />
+	</form>
+	<!-- EndOfSale Form e-->
+
+	<div class="header">
+		Simple Pos v0.1<span class="clock" id="clock"></span>
+	</div>
+
+	<div class="contents">
+	  
+	  <div class="col-sm-6 left-body">
+
+	  	<div class="col-sm-2 button-small button active" id="productCreate" >+</div>
+		<div class="col-sm-2 button-small button active" id="productDelete">-</div>
+		<div class="col-sm-2 button-small button"></div>
+		<div class="col-sm-6 button-big button active" id="saleStatus" >₩ {{saleTotalNotEndSum}}</div>
+
+	  	<div class="main-area">
+
+	  		<!-- Save Form s-->
+	  		<form name="saveForm" method="post" action="product/insert">
+		  		<div class="col-sm-12 product-new button" id="newProductForm" style="display: none">
+		  			<div class="col-sm-4"><input type="text" size="10" name="productName" id="productName" placeholder="상품이름"  onkeypress="return runScript(event)" /></div>
+		  			<div class="col-sm-4"><input type="text" size="10" name="productPrice" id="productPrice" placeholder="상품가격"onkeypress="return runScript(event)" /></div>
+		  			<div class="col-sm-4"><input type="button" value="추가" id="newProductSave"/></div>
+		  		</div>
+	  		</form>
+	  		<!-- Save Form e-->
+
+	  		<!-- item list s-->
+	  		{% for item in productResult %}
+	  			<div class="col-sm-6 product-item button" 
+	  			data-code="{{item['product_code']}}" 
+	  			data-name="{{item['product_name']}}" 
+	  			data-price="{{item['product_price']}}">{{item['product_name']}} {{item['product_price']}}</div>
+	  		{% endfor %}
+	  		<!-- item list e-->
+
+	  	</div>
+
+	  </div>
+
+	  <div class="col-sm-6 right-body">
+
+		  <div class="col-sm-4 button-pad button active" id="endOfSale" >판매마감</div>
+		  <div class="col-sm-4 button-pad button" ></div>
+		  <div class="col-sm-4 button-pad button" ></div>
+
+		  <!-- Sale Form s-->
+		  <form name="saleForm" method="post" action="sale/insert">
+			  <div class="col-sm-12 result-area">
+			  	<div class="sumDiv">합계 : ₩ <span id="saleSum">0</span></div>
+			  	<div id="saleList"></div>
+			  </div>
+		  </form>
+		  <!-- Sale Form e-->
+
+		  <!-- keypad layout s-->
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-6 button-pad-light button"><span id="numberValue">0</span></div>
+		  <div class="col-sm-4 button-pad button active" id="keypadBackSpace"><span class="glyphicon glyphicon-step-backward"></span></div>
+		
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-2 button-pad-dark button"></div>
+		  <div class="col-sm-2 button-pad-dark button"></div>		  
+		  <div class="col-sm-2 button-pad-dark button"></div>
+		  <div class="col-sm-2 button-pad-dark button active" id="keypadPlusOne">+1</div>
+		  <div class="col-sm-2 button-pad-dark button active" id="keypadMinusOne">-1</div>
+
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-2 button-pad button active" id="keypad7">7</div>
+		  <div class="col-sm-2 button-pad button active" id="keypad8">8</div>		  
+		  <div class="col-sm-2 button-pad button active" id="keypad9">9</div>
+		  <div class="col-sm-4 button-pad-dark button active" id="saleQuantity">수량</div>		  
+
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-2 button-pad button active" id="keypad4">4</div>
+		  <div class="col-sm-2 button-pad button active" id="keypad5">5</div>		  
+		  <div class="col-sm-2 button-pad button active" id="keypad6">6</div>
+		  <div class="col-sm-4 button-pad-dark button active" id="salePrice">가격</div>		  
+
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-2 button-pad button active" id="keypad1">1</div>
+		  <div class="col-sm-2 button-pad button active" id="keypad2">2</div>		  
+		  <div class="col-sm-2 button-pad button active" id="keypad3">3</div>
+		  <div class="col-sm-4 button-pad-dark button"></div>
+
+		  <div class="col-sm-2 button-pad button"></div>
+		  <div class="col-sm-4 button-pad button active" id="keypad0">0</div>		  
+		  <div class="col-sm-2 button-pad button active" id="keypadClear">CL</div>
+		  <div class="col-sm-4 button-pad-dark button active" id="saleSave"><span class="glyphicon glyphicon-save"></span></div>
+		  <!-- keypad layout e-->
+
+	  </div>
+
+	  	<!-- Sale History -->
+		<div id="dialog" class="dialog" style="display: none">
+			
+			<span class="col-sm-12 sale-hist-title">판매내역</span>
+			<span class="col-sm-4 sale-hist-title">총 수익: ₩ {{saleTotalSum}}</span>
+			<span class="col-sm-4 sale-hist-title">현재 판매수익: ₩ {{saleTotalNotEndSum}}</span>
+			<span class="col-sm-4 sale-hist-title">마감수익: ₩ {{saleTotalEndSum}}</span>
+			
+			<div class="col-sm-3 sale-hist-item">거래일시</div>
+	  		<div class="col-sm-4 sale-hist-item">상품명</div>
+	  		<div class="col-sm-2 sale-hist-item">수량</div>
+	  		<div class="col-sm-2 sale-hist-item">가격</div>
+	  		<div class="col-sm-1 sale-hist-item">마감</div>
+	  		{% for item in saleResult %}
+	  			{% if item.sale_code%2 == 1 %}
+		  			<div class="col-sm-3 sale-hist-item">{{item.reg_date.strftime('%Y.%m.%d %H:%M')}}</div>
+		  			<div class="col-sm-4 sale-hist-item">{{item.product.product_name}}</div>
+		  			<div class="col-sm-2 sale-hist-item">{{item.sale_quantity}}</div>
+		  			<div class="col-sm-2 sale-hist-item align-left">₩ {{item.sale_price}}</div>
+		  			<div class="col-sm-1 sale-hist-item">{{item.end_yn}}</div>
+		  		{% else %}
+		  			<div class="col-sm-3 sale-hist-item end">{{item.reg_date.strftime('%Y.%m.%d %H:%M')}}</div>
+		  			<div class="col-sm-4 sale-hist-item end">{{item.product.product_name}}</div>
+		  			<div class="col-sm-2 sale-hist-item end">{{item.sale_quantity}}</div>
+		  			<div class="col-sm-2 sale-hist-item align-left end">₩ {{item.sale_price}}</div>
+		  			<div class="col-sm-1 sale-hist-item end">{{item.end_yn}}</div>
+	  			{% endif %}
+	  		{% endfor %}
+		</div>
+	
+	</div>
+
+</body>
+</html>
