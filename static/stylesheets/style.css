@@ -11,9 +11,12 @@ p {
     padding-left : 5px;
 }
 
-ol {
-    padding: 0;
-    margin-left: 30px;
+input[type="text"] {
+   width:170px;
+}
+
+input[type="number"] {
+   width:170px;
 }
 
 .clock {
@@ -114,12 +117,14 @@ ol {
 .product-new {
     height: 60px;
     background-color: white;
+    text-align: left;
 }
 
 .product-new input {
     background-color: #eee;
     font-size: 20px;
     margin-top: 5px;
+
 }
 
 .sumDiv {
